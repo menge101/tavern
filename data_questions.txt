@@ -1,0 +1,45 @@
+As a user what is my user info?
+    User:
+    - Associated payment account
+    - Real user data
+    - First name
+    - Last name
+    - address object
+    - phone
+    - email
+    - Payment method object
+    - hasher object
+
+As a user what events exist?
+    Event:
+    - Name
+    - Description
+    - Kennel object
+    - Type
+        - potentially an enumerable value, may be used to trigger additional behaviors or to mixin functionality
+    - Datetime
+    - Start location
+        - Address object
+        - Latitude
+        - Longitude
+    - Trails
+        - Can be null
+        - Indicates multiple trail options for an event that is bigger than a single trail
+
+As a user what events exist in the kennels of interest to me?
+    Kennel:
+    - Full name
+    - Acronym
+    - Region
+    - Events
+
+
+Subobjects:
+    Address:
+    - Country
+    - fields based on country
+
+    Hasher:
+        - Hash name
+        - Mother kennel
+        -
