@@ -2,7 +2,7 @@ import datetime
 import pynamodb.exceptions
 import unittest
 
-from app.models.event import EventDataModel
+from app.models.persistence.event import EventDataModel
 
 
 class EventTableTests(unittest.TestCase):

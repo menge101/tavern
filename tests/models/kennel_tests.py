@@ -1,8 +1,6 @@
-import datetime
-import pynamodb.exceptions
 import unittest
 
-from app.models.kennel import KennelDataModel
+from app.models.persistence.kennel import KennelDataModel
 
 
 class KennelTests(unittest.TestCase):

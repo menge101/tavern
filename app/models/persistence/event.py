@@ -1,13 +1,5 @@
-from pynamodb.attributes import JSONAttribute, ListAttribute, UnicodeAttribute, UTCDateTimeAttribute
-from app.models.base import BaseModel
-
-
-class EventIndexModel(BaseModel):
-    class Meta:
-        table_name = 'event_index'
-
-    event_id = UnicodeAttribute()
-    foreign_data = JSONAttribute()
+from pynamodb.attributes import ListAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from app.models.persistence.base import BaseModel
 
 
 class EventDataModel(BaseModel):

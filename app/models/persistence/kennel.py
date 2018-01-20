@@ -1,5 +1,5 @@
-from pynamodb.attributes import JSONAttribute, ListAttribute, UnicodeAttribute, UTCDateTimeAttribute
-from app.models.base import BaseModel
+from pynamodb.attributes import JSONAttribute, ListAttribute, UnicodeAttribute
+from app.models.persistence.base import BaseModel
 
 
 class KennelIndexModel(BaseModel):
