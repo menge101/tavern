@@ -32,6 +32,7 @@ As a user what events exist in the kennels of interest to me?
     - Acronym
     - Region
     - Events
+    - Members
 
 
 Subobjects:
