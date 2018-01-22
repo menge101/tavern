@@ -1,6 +1,7 @@
 import unittest
-
+from datetime import datetime, timezone
 from app.models.persistence.kennel import KennelDataModel
+from freezegun import freeze_time
 
 
 class KennelTests(unittest.TestCase):
@@ -8,7 +9,7 @@ class KennelTests(unittest.TestCase):
     def setUpClass(cls):
         KennelDataModel.Meta.host = 'http://localhost:8000'
         KennelDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
-        
+
     def setUp(self):
         self.kennel_id = 'test_id'
         self.name = 'test_kennel'
@@ -19,7 +20,7 @@ class KennelTests(unittest.TestCase):
         self.officers = {'grand matress': 'gm_hasher', 'religous advisor': 'ra_hasher', 'hash cash': 'hash_cash_hasher'}
 
     @classmethod
-    def TearDownClass(cls):
+    def tearDownClass(cls):
         if KennelDataModel.exists():
             KennelDataModel.delete_table()
 
@@ -49,3 +50,11 @@ class KennelTests(unittest.TestCase):
         kennel = KennelDataModel(self.kennel_id, name=self.name)
         with self.assertRaises(ValueError):
             kennel.save()
+
+    def test_timestamps(self):
+        time = datetime.now(timezone.utc)
+        with freeze_time(time):
+            kennel = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym)
+            kennel.save()
+            self.assertEqual(kennel.modified_at, time)
+            self.assertEqual(kennel.created_at, time)

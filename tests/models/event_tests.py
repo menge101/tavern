@@ -1,8 +1,8 @@
-import datetime
-import pynamodb.exceptions
 import unittest
-
+from datetime import datetime, timezone
+import pynamodb.exceptions
 from app.models.persistence.event import EventDataModel
+from freezegun import freeze_time
 
 
 class EventTableTests(unittest.TestCase):
@@ -13,7 +13,7 @@ class EventTableTests(unittest.TestCase):
         self.description = 'An event to test dynamodb persistence'
         self.kennels = ['kennel1']
         self.type = 'basic'
-        self.start_time = datetime.datetime.now()
+        self.start_time = datetime.now()
         self.end_time = self.start_time
         self.start_location = 'location1'
         self.trails = ['trail1']
@@ -51,7 +51,7 @@ class EventTests(unittest.TestCase):
         self.description = 'An event to test dynamodb persistence'
         self.kennels = ['kennel1']
         self.type = 'basic'
-        self.start_time = datetime.datetime.now(tz=datetime.timezone.utc)
+        self.start_time = datetime.now(tz=timezone.utc)
         self.end_time = self.start_time
         self.start_location = 'location1'
         self.trails = ['trail1']
@@ -66,7 +66,7 @@ class EventTests(unittest.TestCase):
         EventDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
 
     @classmethod
-    def TearDownClass(cls):
+    def tearDownClass(cls):
         if EventDataModel.exists():
             EventDataModel.delete_table()
 
@@ -101,3 +101,13 @@ class EventTests(unittest.TestCase):
 
     def test_get_host(self):
         self.assertEqual('http://localhost:8000', self.event.host())
+
+    def test_timestamps(self):
+        time = datetime.now(timezone.utc)
+        with freeze_time(time):
+            event = EventDataModel(self.event_id, hares=self.hares, name=self.name, description=self.description,
+                                   kennels=self.kennels, type=self.type, start_time=self.start_time,
+                                   end_time=self.end_time, start_location=self.start_location, trails=self.trails)
+            event.save()
+            self.assertEqual(event.modified_at, time)
+            self.assertEqual(event.created_at, time)

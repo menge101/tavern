@@ -1,8 +1,9 @@
-from pynamodb.attributes import ListAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from app.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.base import BaseModel
+from pynamodb.attributes import ListAttribute, UnicodeAttribute, UTCDateTimeAttribute
 
 
-class EventDataModel(BaseModel):
+class EventDataModel(TimeStampableMixin, BaseModel):
     class Meta:
         table_name = 'events'
 

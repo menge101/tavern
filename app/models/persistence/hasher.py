@@ -1,8 +1,9 @@
-from pynamodb.attributes import JSONAttribute, UnicodeAttribute
+from app.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.base import BaseModel
+from pynamodb.attributes import JSONAttribute, UnicodeAttribute
 
 
-class HasherDataModel(BaseModel):
+class HasherDataModel(TimeStampableMixin, BaseModel):
     class Meta:
         table_name = 'hashers'
 
@@ -12,4 +13,3 @@ class HasherDataModel(BaseModel):
     mother_kennel = UnicodeAttribute()
     real_name = UnicodeAttribute(null=True)
     user = UnicodeAttribute(null=True)
-
