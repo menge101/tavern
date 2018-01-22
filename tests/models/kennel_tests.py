@@ -29,6 +29,11 @@ class KennelTests(unittest.TestCase):
         self.assertIsNone(kennel.events)
         self.assertIsNone(kennel.members)
         self.assertIsNone(kennel.officers)
+        self.assertIsNone(kennel.contact)
+        self.assertIsNone(kennel.webpage)
+        self.assertIsNone(kennel.facebook)
+        self.assertIsNone(kennel.founding)
+        self.assertIsNone(kennel.description)
 
     def test_id_required(self):
         kennel = KennelDataModel(name=self.name, acronym=self.acronym)

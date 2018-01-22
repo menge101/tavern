@@ -33,6 +33,11 @@ As a user what events exist in the kennels of interest to me?
     - Region
     - Events
     - Members
+    - Officers
+    - contact data
+    - webpage
+    - founding meta data
+    - description
 
 
 Subobjects:

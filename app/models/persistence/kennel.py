@@ -21,3 +21,8 @@ class KennelDataModel(BaseModel):
     events = ListAttribute(null=True)
     members = ListAttribute(null=True)
     officers = JSONAttribute(null=True)
+    contact = JSONAttribute(null=True)
+    webpage = UnicodeAttribute(null=True)
+    facebook = UnicodeAttribute(null=True)
+    founding = JSONAttribute(null=True)
+    description = UnicodeAttribute(null=True)
