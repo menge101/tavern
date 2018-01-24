@@ -43,4 +43,6 @@ Subobjects:
     Hasher:
         - Hash name
         - Mother kennel
-        -
+        - Contact Info
+        - real name
+        - user ref - nullable
