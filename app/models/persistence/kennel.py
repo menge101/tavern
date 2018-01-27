@@ -3,14 +3,6 @@ from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from pynamodb.attributes import JSONAttribute, ListAttribute, UnicodeAttribute
 
 
-class KennelIndexModel(BaseModel):
-    class Meta:
-        table_name = 'kennel_index'
-
-    kennel_id = UnicodeAttribute()
-    foreign_data = JSONAttribute()
-
-
 class KennelDataModel(TimeStampableMixin, BaseModel):
     class Meta:
         table_name = 'kennels'
