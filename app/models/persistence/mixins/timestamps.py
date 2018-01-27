@@ -1,3 +1,4 @@
+from copy import copy
 from datetime import datetime, timezone
 from pynamodb.attributes import UTCDateTimeAttribute
 from pynamodb.models import Model
@@ -9,6 +10,23 @@ from pynamodb.models import Model
 class TimeStampableMixin(Model):
     created_at = UTCDateTimeAttribute()
     modified_at = UTCDateTimeAttribute()
+    __before_save_hooks__ = ['set_timestamps']
+    __on_update_hooks__ = ['generate_timestamp_update_action']
+
+    def __init__(self, hash_key=None, range_key=None, **attributes):
+        before_hooks = copy(__class__.__before_save_hooks__)
+        try:
+            self.before_save_hooks.extend(before_hooks)
+        except AttributeError:
+            self.before_save_hooks = before_hooks
+
+        update_hooks = copy(__class__.__on_update_hooks__)
+        try:
+            self.on_update_hooks.extend(update_hooks)
+        except AttributeError:
+            self.on_update_hooks = update_hooks
+
+        super().__init__(hash_key, range_key, **attributes)
 
     def generate_timestamp_update_action(self):
         return self.__class__.modified_at.set(datetime.now(timezone.utc))
@@ -17,16 +35,3 @@ class TimeStampableMixin(Model):
         if self.created_at is None:
             self.created_at = datetime.now(timezone.utc)
         self.modified_at = datetime.now(timezone.utc)
-
-    # the following code assumes that the __save_before_hooks__ attribute already
-    #  exists and attempts to append to it.  It will except on a NameError,
-    # meaning that the attribute does not exist, and it will create it.
-    try:
-        __before_save_hooks__.append('set_timestamps')
-    except NameError:
-        __before_save_hooks__ = ['set_timestamps']
-
-    try:
-        __on_update_hooks__.append('generate_timestamp_update_action')
-    except NameError:
-        __on_update_hooks__ = ['generate_timestamp_update_action']

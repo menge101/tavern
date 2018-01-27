@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from freezegun import freeze_time
 
 
-from ..mixins.timestamp_test_model import TimestampTestModel
+from .timestamp_test_model import TimestampTestModel
 
 
 class TimestampTests(unittest.TestCase):

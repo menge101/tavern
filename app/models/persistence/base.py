@@ -2,9 +2,8 @@ from pynamodb.models import Model
 
 
 class BaseModel(Model):
-    __before_save_hooks__ = list()
-    __after_save_hooks__ = list()
-    __on_update_hooks__ = list()
+    def __init__(self, hash_key=None, range_key=None, **attributes):
+        super(BaseModel, self).__init__(hash_key, range_key, **attributes)
 
     def host(self, value=None):
         if value is not None:
@@ -12,14 +11,12 @@ class BaseModel(Model):
         return self.Meta.host
 
     def save(self, condition=None, conditional_operator=None, **expected_values):
-        for hook in self.__before_save_hooks__:
+        for hook in self.before_save_hooks:
             getattr(self, hook)()
         super(BaseModel, self).save(condition=condition, conditional_operator=conditional_operator, **expected_values)
-        for hook in self.__after_save_hooks__:
-            getattr(self, hook)()
 
     def update(self, attributes=None, actions=None, condition=None, conditional_operator=None, **expected_values):
-        actions.extend([getattr(self, hook)() for hook in self.__on_update_hooks__])
+        actions.extend([getattr(self, hook)() for hook in self.on_update_hooks])
         super(BaseModel, self).update(attributes=attributes, actions=actions, condition=condition,
                                       conditional_operator=conditional_operator, **expected_values)
 

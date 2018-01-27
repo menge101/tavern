@@ -1,5 +1,5 @@
-from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.base import BaseModel
+from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from pynamodb.attributes import ListAttribute, UnicodeAttribute, UTCDateTimeAttribute
 
 

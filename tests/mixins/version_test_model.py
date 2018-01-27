@@ -1,5 +1,5 @@
-from app.models.persistence.mixins.version import VersionMixin
 from app.models.persistence.base import BaseModel
+from app.models.persistence.mixins.version import VersionMixin
 from pynamodb.attributes import UnicodeAttribute
 
 
