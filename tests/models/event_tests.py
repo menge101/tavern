@@ -1,46 +1,7 @@
 import unittest
 from datetime import datetime, timezone
-import pynamodb.exceptions
 from app.models.persistence.event import EventDataModel
 from freezegun import freeze_time
-
-
-class EventTableTests(unittest.TestCase):
-    def setUp(self):
-        self.event_id = 'test_id'
-        self.hares = ['hare1', 'hare2']
-        self.name = 'test event'
-        self.description = 'An event to test dynamodb persistence'
-        self.kennels = ['kennel1']
-        self.type = 'basic'
-        self.start_time = datetime.now()
-        self.end_time = self.start_time
-        self.start_location = 'location1'
-        self.trails = ['trail1']
-        EventDataModel.Meta.host = 'http://localhost:8000'
-        if EventDataModel.exists():
-            EventDataModel.delete_table()
-
-    def tearDown(self):
-        if EventDataModel.exists():
-            EventDataModel.delete_table()
-
-    def test_create_with_no_table_existing(self):
-        with self.assertRaises(pynamodb.exceptions.TableDoesNotExist):
-            EventDataModel(self.event_id, hares=self.hares, name=self.name, description=self.description,
-                           kennels=self.kennels, type=self.type, start_time=self.start_time, end_time=self.end_time,
-                           start_location=self.start_location, trails=self.trails)
-
-    def test_table_create(self):
-        self.assertFalse(EventDataModel.exists())
-        EventDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
-        self.assertTrue(EventDataModel.exists())
-
-    def test_table_delete(self):
-        EventDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
-        self.assertTrue(EventDataModel.exists())
-        EventDataModel.delete_table()
-        self.assertFalse(EventDataModel.exists())
 
 
 class EventTests(unittest.TestCase):
