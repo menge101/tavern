@@ -15,9 +15,11 @@ class KennelTests(unittest.TestCase):
         self.name = 'test_kennel'
         self.acronym = 'tkh3'
         self.region = ['1.1', '1.2', '2.2', '2.1']
-        self.events = ['event1', 'event2', 'event3']
-        self.members = ['hasher1', 'hasher2', 'hasher3']
-        self.officers = {'grand matress': 'gm_hasher', 'religous advisor': 'ra_hasher', 'hash cash': 'hash_cash_hasher'}
+        self.contact = [{'name': 'test person', 'phone': '4445556666', 'email': 'atestemail@test.com'}]
+        self.facebook = 'http://www.facebook.com/groups/test_kennel'
+        self.webpage = 'http://www.testkennel.com'
+        self.founding = {'founder': 'G', 'first trail': '1/1/1930'}
+        self.description = 'A test kennel'
 
     @classmethod
     def tearDownClass(cls):
@@ -27,9 +29,6 @@ class KennelTests(unittest.TestCase):
     def test_nullable_fields(self):
         kennel = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym)
         self.assertIsNone(kennel.region)
-        self.assertIsNone(kennel.events)
-        self.assertIsNone(kennel.members)
-        self.assertIsNone(kennel.officers)
         self.assertIsNone(kennel.contact)
         self.assertIsNone(kennel.webpage)
         self.assertIsNone(kennel.facebook)
@@ -58,3 +57,14 @@ class KennelTests(unittest.TestCase):
             kennel.save()
             self.assertEqual(kennel.modified_at, time)
             self.assertEqual(kennel.created_at, time)
+
+    def test_all_fields(self):
+        kennel = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym, region=self.region,
+                                 contact=self.contact, webpage=self.webpage, facebook=self.facebook,
+                                 founding=self.founding, description=self.description)
+        self.assertEqual(kennel.region, self.region)
+        self.assertEqual(kennel.contact, self.contact)
+        self.assertEqual(kennel.webpage, self.webpage)
+        self.assertEqual(kennel.facebook, self.facebook)
+        self.assertEqual(kennel.founding, self.founding)
+        self.assertEqual(kennel.description, self.description)

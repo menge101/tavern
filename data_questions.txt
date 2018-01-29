@@ -31,9 +31,9 @@ As a user what events exist in the kennels of interest to me?
     - Full name
     - Acronym
     - Region
-    - Events
-    - Members
-    - Officers
+    - Events - comes from kennelEvents table
+    - Members - comes from KennelMembers table
+    - Officers - comes from KennelOfficerHistory
     - contact data
     - webpage
     - founding meta data
