@@ -5,6 +5,9 @@ class BaseModel(Model):
     def __init__(self, hash_key=None, range_key=None, **attributes):
         super(BaseModel, self).__init__(hash_key, range_key, **attributes)
 
+    def attributes(self):
+        return {k: v for (k, v) in self.attribute_values.items() if k not in self.__meta_attributes__}
+
     def host(self, value=None):
         if value is not None:
             self.Meta.host = value

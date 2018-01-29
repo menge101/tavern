@@ -26,6 +26,12 @@ class TimeStampableMixin(Model):
         except AttributeError:
             self.on_update_hooks = update_hooks
 
+        meta_attributes = ['created_at', 'modified_at']
+        try:
+            self.__meta_attributes__.extend(meta_attributes)
+        except AttributeError:
+            self.__meta_attributes__ = meta_attributes
+
         super().__init__(hash_key, range_key, **attributes)
 
     def generate_timestamp_update_action(self):

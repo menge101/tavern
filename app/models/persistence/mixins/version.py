@@ -23,6 +23,12 @@ class VersionMixin(Model):
         except AttributeError:
             self.on_update_hooks = update_hooks
 
+        meta_attributes = ['version']
+        try:
+            self.__meta_attributes__.extend(meta_attributes)
+        except AttributeError:
+            self.__meta_attributes__ = meta_attributes
+
         super().__init__(hash_key, range_key, **attributes)
 
     def generate_version_update_action(self):

@@ -1,9 +1,10 @@
 from app.models.persistence.base import BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
-from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute
+from app.models.persistence.mixins.version import VersionMixin
+from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
 
 
-class KennelDataModel(TimeStampableMixin, BaseModel):
+class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
     class Meta:
         table_name = 'kennels'
 
