@@ -1,6 +1,6 @@
 from app.models.persistence.base import BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
-from pynamodb.attributes import JSONAttribute, ListAttribute, UnicodeAttribute
+from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute
 
 
 class KennelDataModel(TimeStampableMixin, BaseModel):
@@ -19,3 +19,4 @@ class KennelDataModel(TimeStampableMixin, BaseModel):
     facebook = UnicodeAttribute(null=True)
     founding = JSONAttribute(null=True)
     description = UnicodeAttribute(null=True)
+    next_trail_number = NumberAttribute(null=True)

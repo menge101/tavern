@@ -38,6 +38,7 @@ As a user what events exist in the kennels of interest to me?
     - webpage
     - founding meta data
     - description
+    - next trail number
 
 
 Subobjects:
