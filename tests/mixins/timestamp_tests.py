@@ -35,6 +35,13 @@ class TimestampTests(unittest.TestCase):
         self.assertEqual(result.created_at, start_time)
         self.assertEqual(result.modified_at, after_save)
 
+    def test_attributes(self):
+        self.model.save()
+        result = TimestampTestModel.get('test')
+        attributes = result.attributes()
+        for key in self.model.__meta_attributes__:
+            self.assertNotIn(key, attributes.keys())
+
     def tearDown(self):
         self.model.delete()
 

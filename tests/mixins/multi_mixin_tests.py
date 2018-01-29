@@ -35,6 +35,14 @@ class MultiMixinTests(unittest.TestCase):
         self.assertEqual(result.modified_at, after_save)
         self.assertEqual(result.version, 1)
 
+    def test_attributes(self):
+        model = MultiMixinTestModel('test1', field='test_filed')
+        model.save()
+        result = MultiMixinTestModel.get('test1')
+        attributes = result.attributes()
+        for key in model.__meta_attributes__:
+            self.assertNotIn(key, attributes.keys())
+
     @classmethod
     def tearDownClass(cls):
         if MultiMixinTestModel.exists():

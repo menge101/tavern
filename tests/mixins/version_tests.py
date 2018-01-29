@@ -49,6 +49,14 @@ class VersionTests(unittest.TestCase):
         model.update(actions=[VersionTestModel.field1.set('different')])
         self.assertEqual(model.version, 2)
 
+    def test_attributes(self):
+        model = VersionTestModel('test', field1='test_1', field2='test_2')
+        model.save()
+        result = VersionTestModel.get('test')
+        attributes = result.attributes()
+        for key in model.__meta_attributes__:
+            self.assertNotIn(key, attributes.keys())
+
     @classmethod
     def tearDownClass(cls):
         if VersionTestModel.exists():
