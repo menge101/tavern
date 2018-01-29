@@ -1,6 +1,4 @@
-from .event_tests import EventTests
-from .hasher_tests import HasherTests
-from .kennel_tests import KennelTests
+from tests.models.persistence import EventTests, HasherTests, KennelTests
 
 __all__ = ['EventTests', 'HasherTests', 'KennelTests']
 
