@@ -1,0 +1,19 @@
+Create Event:
+    If kennel doesn't exist
+        Create Kennel
+    If hare doesn't exist
+        Create hasher (hare)
+    Create Event
+    Create record in Kennel-Events
+    Increment next_trail_number in Kennel
+    Create record in Hare-Events
+    Create record in Location-Events
+    Create trail record
+
+Create Kennel
+
+Create Hasher(Hare)
+    If mother kennel doesn't exist
+        Create Kennel
+    Create hasher
+    Create Kennel-member record
