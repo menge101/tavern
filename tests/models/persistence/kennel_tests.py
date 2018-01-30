@@ -12,8 +12,8 @@ class KennelTests(unittest.TestCase):
 
     def setUp(self):
         self.kennel_id = 'test_id'
-        self.name = 'test_kennel'
-        self.acronym = 'tkh3'
+        self.name = 'Test_Kennel'
+        self.acronym = 'TKH3'
         self.region = ['1.1', '1.2', '2.2', '2.1']
         self.contact = [{'name': 'test person', 'phone': '4445556666', 'email': 'atestemail@test.com'}]
         self.facebook = 'http://www.facebook.com/groups/test_kennel'
@@ -59,12 +59,16 @@ class KennelTests(unittest.TestCase):
             self.assertEqual(kennel.created_at, time)
 
     def test_all_fields(self):
-        kennel = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym, region=self.region,
-                                 contact=self.contact, webpage=self.webpage, facebook=self.facebook,
-                                 founding=self.founding, description=self.description)
+        KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym, region=self.region,
+                        contact=self.contact, webpage=self.webpage, facebook=self.facebook,
+                        founding=self.founding, description=self.description).save()
+
+        kennel = KennelDataModel.get(self.kennel_id)
         self.assertEqual(kennel.region, self.region)
         self.assertEqual(kennel.contact, self.contact)
         self.assertEqual(kennel.webpage, self.webpage)
         self.assertEqual(kennel.facebook, self.facebook)
         self.assertEqual(kennel.founding, self.founding)
         self.assertEqual(kennel.description, self.description)
+        self.assertEqual(kennel.lower_name, self.name.lower())
+        self.assertEqual(kennel.lower_acronym, self.acronym.lower())
