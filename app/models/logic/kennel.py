@@ -29,9 +29,14 @@ class KennelLogicModel(object):
     def persistable_attributes(self):
         return {k: v for (k, v) in self.__dict__.items() if k not in self.__unpersistable_attributes__}
 
+    def reload_from_persistence(self):
+        for (k, v) in self.persistence_object.attributes().items():
+            if hasattr(self, k):
+                setattr(self, k, v)
+
     def save(self):
         self.persistence_object.save()
-        return self
+        self.reload_from_persistence()
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
