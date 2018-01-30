@@ -49,13 +49,23 @@ class KennelLogicModel(object):
         return kennel
 
     @classmethod
-    def exists(cls, kennel_id):
-        try:
-            KennelDataModel.get(kennel_id)
-        except KennelDataModel.DoesNotExist:
-            return False
+    def exists(cls, id=None, name=None):
+        if id is not None:
+            return cls.exists_by_id(id)
+        elif name is not None:
+            return cls.exists_by_name(name)
         else:
-            return True
+            raise(ValueError, 'One of id or name must be provided to check for existence.')
+
+    @classmethod
+    def exists_by_id(cls, kennel_id):
+        result = KennelDataModel.count(kennel_id)
+        return result > 0
+
+    @classmethod
+    def exists_by_name(cls, kennel_name):
+        result = KennelDataModel.name_index.count(kennel_name.lower())
+        return result > 0
 
     @classmethod
     def lookup_by_id(cls, kennel_id):

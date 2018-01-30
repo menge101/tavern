@@ -4,15 +4,12 @@ from app.models.persistence.kennel import KennelDataModel
 
 
 class KennelLogicTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        KennelDataModel.Meta.host = 'http://localhost:8000'
-        KennelDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
-
     def setUp(self):
         self.kennel_id = 'test_id'
-        self.name = 'test_kennel'
-        self.acronym = 'tkh3'
+        self.name = 'Test_Kennel'
+        self.acronym = 'TKH3'
+        KennelDataModel.Meta.host = 'http://localhost:8000'
+        KennelDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
 
     def test_init_from_lookup(self):
         KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym).save()
@@ -32,14 +29,20 @@ class KennelLogicTests(unittest.TestCase):
         self.assertEqual(actual.name, self.name)
         self.assertEqual(actual.acronym, self.acronym)
 
-    def test_exists_for_does_not_exist(self):
+    def test_exists_by_id_for_does_not_exist(self):
         self.assertFalse(KennelLogicModel.exists(self.kennel_id))
 
-    def test_exists_for_exists(self):
+    def test_exists_by_name_for_does_not_exist(self):
+        self.assertFalse(KennelLogicModel.exists(name=self.name))
+
+    def test_exists_by_id_for_exists(self):
         KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym).save()
         self.assertTrue(KennelLogicModel.exists(self.kennel_id))
 
-    @classmethod
-    def tearDownClass(cls):
+    def test_exists_by_name_for_exists(self):
+        KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym).save()
+        self.assertTrue(KennelLogicModel.exists(name=self.name))
+
+    def tearDown(self):
         if KennelDataModel.exists():
             KennelDataModel.delete_table()

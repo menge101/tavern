@@ -1,7 +1,29 @@
 from app.models.persistence.base import BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.mixins.version import VersionMixin
-from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute
+from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
+
+
+class KennelNameIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = 'kennel_name_index'
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = KeysOnlyProjection()
+
+    lower_name = UnicodeAttribute(hash_key=True)
+
+
+class KennelAcronymIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = 'kennel_acronym_index'
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = KeysOnlyProjection()
+
+    lower_acronym = UnicodeAttribute(hash_key=True)
+    lower_name = UnicodeAttribute(range_key=True)
 
 
 # The Kennel Data model holds all non-list kennel data
@@ -33,6 +55,8 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
     founding = JSONAttribute(null=True)
     description = UnicodeAttribute(null=True)
     next_trail_number = NumberAttribute(null=True)
+    name_index = KennelNameIndex()
+    acronym_index = KennelAcronymIndex()
 
     def set_search_values(self):
         if self.lower_acronym is None:
