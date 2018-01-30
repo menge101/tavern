@@ -1,6 +1,6 @@
 Create Event:
-    If kennel doesn't exist
-        Create Kennel
+    - If kennel doesn't exist
+        - Create Kennel
     If hare doesn't exist
         Create hasher (hare)
     Create Event
@@ -10,10 +10,10 @@ Create Event:
     Create record in Location-Events
     Create trail record
 
-Create Kennel
+- Create Kennel
 
 Create Hasher(Hare)
-    If mother kennel doesn't exist
-        Create Kennel
+    - If mother kennel doesn't exist
+        - Create Kennel
     Create hasher
     Create Kennel-member record

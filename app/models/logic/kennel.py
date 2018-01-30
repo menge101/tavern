@@ -46,6 +46,15 @@ class KennelLogicModel(object):
         return kennel
 
     @classmethod
+    def exists(cls, kennel_id):
+        try:
+            KennelDataModel.get(kennel_id)
+        except KennelDataModel.DoesNotExist:
+            return False
+        else:
+            return True
+
+    @classmethod
     def lookup_by_id(cls, kennel_id):
         result = KennelDataModel.get(kennel_id)
         attribute_dict = result.attributes()

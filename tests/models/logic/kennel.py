@@ -21,12 +21,23 @@ class KennelLogicTests(unittest.TestCase):
         self.assertEqual(self.name, x.name)
         self.assertEqual(self.acronym, x.acronym)
 
+    def test_lookup_kennel_doesnt_exist(self):
+        with self.assertRaises(KennelDataModel.DoesNotExist):
+            KennelLogicModel.lookup_by_id(self.kennel_id)
+
     def test_create(self):
         actual = KennelLogicModel.create(self.name, self.acronym)
         expected = KennelLogicModel.lookup_by_id(actual.kennel_id)
         self.assertEqual(actual, expected)
         self.assertEqual(actual.name, self.name)
         self.assertEqual(actual.acronym, self.acronym)
+
+    def test_exists_for_does_not_exist(self):
+        self.assertFalse(KennelLogicModel.exists(self.kennel_id))
+
+    def test_exists_for_exists(self):
+        KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym).save()
+        self.assertTrue(KennelLogicModel.exists(self.kennel_id))
 
     @classmethod
     def tearDownClass(cls):
