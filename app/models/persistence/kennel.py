@@ -59,7 +59,13 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
     acronym_index = KennelAcronymIndex()
 
     def set_search_values(self):
-        if self.lower_acronym is None:
-            self.lower_acronym = self.acronym.lower()
-        if self.lower_name is None:
-            self.lower_name = self.name.lower()
+        try:
+            if self.lower_acronym is None:
+                self.lower_acronym = self.acronym.lower()
+        except AttributeError:
+            raise(ValueError('Value of acronym cannot be None'))
+        try:
+            if self.lower_name is None:
+                self.lower_name = self.name.lower()
+        except AttributeError:
+            raise(ValueError('Value of name cannot be None'))
