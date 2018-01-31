@@ -1,12 +1,12 @@
 from ulid import ulid
+from app.models.logic.base import LogicBase
 from app.models.persistence.hasher import HasherDataModel
 
 
-class HasherLogicModel(object):
-    __unpersistable_attributes__ = ['persistence_object']
-
+class HasherLogicModel(LogicBase):
     def __init__(self, hash_name, mother_kennel, hasher_id=None, contact_info=None, real_name=None, user=None,
                  lower_hash_name=None, persistence_object=None):
+        super().__init__()
         self.hasher_id = ulid() if hasher_id is None else hasher_id
         self.hash_name = hash_name
         self.lower_hash_name = lower_hash_name
@@ -18,24 +18,6 @@ class HasherLogicModel(object):
             self.persistence_object = HasherDataModel(**self.persistable_attributes())
         else:
             self.persistence_object = persistence_object
-
-    def persistable_attributes(self):
-        return {k: v for (k, v) in self.__dict__.items() if k not in self.__unpersistable_attributes__}
-
-    def reload_from_persistence(self):
-        for (k, v) in self.persistence_object.attributes().items():
-            if hasattr(self, k):
-                setattr(self, k, v)
-
-    def save(self):
-        self.persistence_object.save()
-        self.reload_from_persistence()
-        return self
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            raise(NotImplemented, f"Equality between {self.__class__} and {other.__class__} is not supported.")
-        return self.persistable_attributes() == other.persistable_attributes()
 
     @classmethod
     def create(cls, hash_name, mother_kennel, hasher_id=None, contact_info=None, real_name=None, user=None,

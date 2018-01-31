@@ -1,13 +1,16 @@
 from ulid import ulid
 from app.models.persistence.kennel import KennelDataModel
+from app.models.logic.base import LogicBase
 
 
-class KennelLogicModel(object):
-    __unpersistable_attributes__ = ['events', 'members', 'officers', 'persistence_object']
+class KennelLogicModel(LogicBase):
+    __unpersistable_attributes__ = ['events', 'members', 'officers']
 
     def __init__(self, name, acronym, kennel_id=None, description=None, region=None, contact=None, webpage=None,
                  founding=None, next_trail_number=None, facebook=None, lower_acronym=None, lower_name=None,
                  persistence_object=None):
+        super().__init__()
+        self.unpersist_values(__class__)
         self.kennel_id = ulid() if kennel_id is None else kennel_id
         self.name = name
         self.lower_name = lower_name
@@ -28,23 +31,6 @@ class KennelLogicModel(object):
         else:
             self.persistence_object = persistence_object
 
-    def persistable_attributes(self):
-        return {k: v for (k, v) in self.__dict__.items() if k not in self.__unpersistable_attributes__}
-
-    def reload_from_persistence(self):
-        for (k, v) in self.persistence_object.attributes().items():
-            if hasattr(self, k):
-                setattr(self, k, v)
-
-    def save(self):
-        self.persistence_object.save()
-        self.reload_from_persistence()
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            raise(NotImplemented, f"Equality between {self.__class__} and {other.__class__} is not supported.")
-        return self.persistable_attributes() == other.persistable_attributes()
-
     @classmethod
     def create(cls, name, acronym, kennel_id=None, description=None, region=None, contact=None, webpage=None,
                founding=None, next_trail_number=None, facebook=None, persistence_object=None):
@@ -56,13 +42,13 @@ class KennelLogicModel(object):
         return kennel
 
     @classmethod
-    def exists(cls, id=None, name=None):
-        if id is not None:
-            return cls.exists_by_id(id)
+    def exists(cls, kennel_id=None, name=None):
+        if kennel_id is not None:
+            return cls.exists_by_id(kennel_id)
         elif name is not None:
             return cls.exists_by_name(name)
         else:
-            raise(ValueError, 'One of id or name must be provided to check for existence.')
+            raise(ValueError, 'One of kennel_id or name must be provided to check for existence.')
 
     @classmethod
     def exists_by_id(cls, kennel_id):
