@@ -25,6 +25,8 @@ class KennelLogicModel(object):
         self.next_trail_number = next_trail_number
         if persistence_object is None:
             self.persistence_object = KennelDataModel(**self.persistable_attributes())
+        else:
+            self.persistence_object = persistence_object
 
     def persistable_attributes(self):
         return {k: v for (k, v) in self.__dict__.items() if k not in self.__unpersistable_attributes__}
