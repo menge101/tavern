@@ -37,5 +37,64 @@ class KennelLogicTests(unittest.TestCase):
             KennelLogicModel.create(self.name, 'xxxhhh')
 
     def tearDown(self):
+        if KennelMemberDataModel.exists():
+            KennelMemberDataModel.delete_table()
+        if KennelDataModel.exists():
+            KennelDataModel.delete_table()
+
+
+class KennelMembershipTests(unittest.TestCase):
+    def setUp(self):
+        KennelDataModel.Meta.host = 'http://localhost:8000'
+        KennelDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+        KennelMemberDataModel.Meta.host = 'http://localhost:8000'
+        if KennelMemberDataModel.exists():
+            KennelMemberDataModel.delete_table()
+        KennelMemberDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+        self.kennel_a = 'kennel_a_id'
+        self.kennel_b = 'kennel_b_id'
+        self.hasher1 = 'hasher_1_id'
+        self.hasher2 = 'hasher_2_id'
+        self.hasher3 = 'hasher_3_id'
+        self.name_a = 'Test_Kennel_A'
+        self.acronym_a = 'TKAH3'
+        self.name_b = 'Test_Kennel_B'
+        self.acronym_b = 'TKBH3'
+
+    def test_create_membership(self):
+        KennelLogicModel.create_membership(self.kennel_a, self.hasher1)
+        actual = list(KennelMemberDataModel.query(self.kennel_a))[0]
+        self.assertEqual(actual.attributes()['kennel_id'], self.kennel_a)
+        self.assertEqual(actual.attributes()['hasher_id'], self.hasher1)
+
+    def test_load_members(self):
+        a = KennelLogicModel(self.name_a, self.acronym_a, kennel_id=self.kennel_a)
+        b = KennelLogicModel(self.name_b, self.acronym_b, kennel_id=self.kennel_b)
+        KennelLogicModel.create_membership(a.kennel_id, self.hasher1)
+        KennelLogicModel.create_membership(a.kennel_id, self.hasher2)
+        KennelLogicModel.create_membership(b.kennel_id, self.hasher3)
+        a.load_members()
+        b.load_members()
+        self.assertListEqual(a.members, [self.hasher1, self.hasher2])
+        self.assertListEqual(b.members, [self.hasher3])
+
+    def test_add_member(self):
+        a = KennelLogicModel(self.name_a, self.acronym_a, kennel_id=self.kennel_a)
+        b = KennelLogicModel(self.name_b, self.acronym_b, kennel_id=self.kennel_b)
+        a.add_member(self.hasher1)
+        a.add_member(self.hasher2)
+        b.add_member(self.hasher3)
+        self.assertListEqual(a.members, [self.hasher1, self.hasher2])
+        self.assertListEqual(b.members, [self.hasher3])
+
+    def test_add_same_member_twice(self):
+        a = KennelLogicModel(self.name_a, self.acronym_a, kennel_id=self.kennel_a)
+        a.add_member(self.hasher1)
+        with self.assertRaises(AlreadyExists):
+            a.add_member(self.hasher1)
+
+    def tearDown(self):
+        if KennelMemberDataModel.exists():
+            KennelMemberDataModel.delete_table()
         if KennelDataModel.exists():
             KennelDataModel.delete_table()

@@ -107,3 +107,4 @@ class KennelMemberDataModel(TimeStampableMixin, VersionMixin, BaseModel):
     kennel_id = UnicodeAttribute(hash_key=True)
     hasher_id = UnicodeAttribute(range_key=True)
     joined = UTCDateTimeAttribute(null=True)
+
