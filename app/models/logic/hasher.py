@@ -6,6 +6,8 @@ from app.models.persistence.hasher import HasherDataModel
 class HasherLogicModel(LogicBase):
     def __init__(self, hash_name, mother_kennel, hasher_id=None, contact_info=None, real_name=None, user=None,
                  lower_hash_name=None, persistence_object=None):
+        if lower_hash_name is None:
+            lower_hash_name = hash_name.lower()
         super().__init__()
         self.hasher_id = ulid() if hasher_id is None else hasher_id
         self.hash_name = hash_name
@@ -29,27 +31,9 @@ class HasherLogicModel(LogicBase):
         return hasher
 
     @classmethod
-    def exists(cls, id=None, hash_name=None):
-        if id is not None:
-            return cls.exists_by_id(id)
-        elif hash_name is not None:
-            return cls.exists_by_hash_name(hash_name)
-        else:
-            raise (ValueError, 'One of id or hash_name must be provided to check for existence.')
-
-    @classmethod
-    def exists_by_id(cls, hasher_id):
-        result = HasherDataModel.count(hasher_id)
-        return result > 0
-
-    @classmethod
-    def exists_by_hash_name(cls, hash_name):
-        result = HasherDataModel.hash_name_index.count(hash_name.lower())
-        return result > 0
-
-    @classmethod
     def lookup_by_id(cls, hasher_id):
         result = HasherDataModel.get(hasher_id)
         attribute_dict = result.attributes()
         attribute_dict['persistence_object'] = result
+        attribute_dict['hasher_id'] = result.hasher_id
         return HasherLogicModel(**attribute_dict)
