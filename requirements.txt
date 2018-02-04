@@ -1,2 +1,4 @@
+geocoder
+geohash
 pynamodb
 ulid
