@@ -1,8 +1,9 @@
+from app.models.persistence import AlreadyExists
 from app.models.persistence.base import BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.mixins.version import VersionMixin
-from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute
-from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
+from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 
 class KennelNameIndex(GlobalSecondaryIndex):
@@ -10,7 +11,7 @@ class KennelNameIndex(GlobalSecondaryIndex):
         index_name = 'kennel_name_index'
         read_capacity_units = 1
         write_capacity_units = 1
-        projection = KeysOnlyProjection()
+        projection = AllProjection()
 
     lower_name = UnicodeAttribute(hash_key=True)
 
@@ -20,7 +21,7 @@ class KennelAcronymIndex(GlobalSecondaryIndex):
         index_name = 'kennel_acronym_index'
         read_capacity_units = 1
         write_capacity_units = 1
-        projection = KeysOnlyProjection()
+        projection = AllProjection()
 
     lower_acronym = UnicodeAttribute(hash_key=True)
     lower_name = UnicodeAttribute(range_key=True)
@@ -36,11 +37,11 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
         table_name = 'kennels'
 
     def __init__(self, hash_key=None, range_key=None, **attributes):
-        hook = ['set_search_values']
+        meta_attributes = ['kennel_id']
         try:
-            self.before_save_hooks.extend(hook)
+            self.__meta_attributes__.extend(meta_attributes)
         except AttributeError:
-            self.before_save_hooks = hook
+            self.__meta_attributes__ = meta_attributes
         super().__init__(hash_key, range_key, **attributes)
 
     kennel_id = UnicodeAttribute(hash_key=True)
@@ -58,14 +59,51 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
     name_index = KennelNameIndex()
     acronym_index = KennelAcronymIndex()
 
-    def set_search_values(self):
+    def save(self, condition=None, conditional_operator=None, **expected_values):
+        matches = self.matching_records_by_name(self)
+        if matches:
+            msg = f'Record with name {self.name} already exists.'
+            raise AlreadyExists(msg)
+        super().save(condition=condition, conditional_operator=conditional_operator, **expected_values)
+
+    @classmethod
+    def matching_records(cls, record, filter_self=True):
+        if record.lower_name is None:
+            raise ValueError('Lower name cannot be None.')
+        query_result = cls.name_index.query(record.lower_name)
+        record_attrs = record.attributes()
+        results = [result for result in query_result if cls._record_match(result.attributes(), record_attrs)]
+        if filter_self:
+            results = [result for result in results if result.kennel_id != record.kennel_id]
+        return results
+
+    @classmethod
+    def matching_records_by_name(cls, record, filter_self=True):
+        if record.lower_name is None:
+            raise ValueError('Lower name cannot be None.')
+        query_result = cls.name_index.query(record.lower_name)
+        results = [result for result in query_result if result.lower_name == record.lower_name]
+        if filter_self:
+            results = [result for result in results if result.kennel_id != record.kennel_id]
+        return results
+
+    @classmethod
+    def record_exists(cls, record):
+        return cls.count(record.kennel_id) > 0
+
+    @staticmethod
+    def _record_match(a, b):
         try:
-            if self.lower_acronym is None:
-                self.lower_acronym = self.acronym.lower()
-        except AttributeError:
-            raise(ValueError('Value of acronym cannot be None'))
-        try:
-            if self.lower_name is None:
-                self.lower_name = self.name.lower()
-        except AttributeError:
-            raise(ValueError('Value of name cannot be None'))
+            return all([a[key] == b[key] for key in a.keys()])
+        except KeyError:
+            return False
+
+
+# The kennel member data model holds the list of hashers that are members of a given kennel
+class KennelMemberDataModel(TimeStampableMixin, VersionMixin, BaseModel):
+    class Meta:
+        table_name = 'kennel_members'
+
+    kennel_id = UnicodeAttribute(hash_key=True)
+    hasher_id = UnicodeAttribute(range_key=True)
+    joined = UTCDateTimeAttribute(null=True)

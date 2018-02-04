@@ -9,6 +9,10 @@ class KennelLogicModel(LogicBase):
     def __init__(self, name, acronym, kennel_id=None, description=None, region=None, contact=None, webpage=None,
                  founding=None, next_trail_number=None, facebook=None, lower_acronym=None, lower_name=None,
                  persistence_object=None):
+        if lower_acronym is None:
+            lower_acronym = acronym.lower()
+        if lower_name is None:
+            lower_name = name.lower()
         super().__init__()
         self.unpersist_values(__class__)
         self.kennel_id = ulid() if kennel_id is None else kennel_id
@@ -41,28 +45,10 @@ class KennelLogicModel(LogicBase):
         kennel.save()
         return kennel
 
-    @classmethod
-    def exists(cls, kennel_id=None, name=None):
-        if kennel_id is not None:
-            return cls.exists_by_id(kennel_id)
-        elif name is not None:
-            return cls.exists_by_name(name)
-        else:
-            raise(ValueError, 'One of kennel_id or name must be provided to check for existence.')
-
-    @classmethod
-    def exists_by_id(cls, kennel_id):
-        result = KennelDataModel.count(kennel_id)
-        return result > 0
-
-    @classmethod
-    def exists_by_name(cls, kennel_name):
-        result = KennelDataModel.name_index.count(kennel_name.lower())
-        return result > 0
-
-    @classmethod
-    def lookup_by_id(cls, kennel_id):
+    @staticmethod
+    def lookup_by_id(kennel_id):
         result = KennelDataModel.get(kennel_id)
         attribute_dict = result.attributes()
         attribute_dict['persistence_object'] = result
+        attribute_dict['kennel_id'] = kennel_id
         return KennelLogicModel(**attribute_dict)
