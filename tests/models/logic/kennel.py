@@ -1,7 +1,8 @@
 import unittest
+from app.models.logic.hasher import HasherLogicModel
 from app.models.logic.kennel import KennelLogicModel
 from app.models.persistence import AlreadyExists
-from app.models.persistence.kennel import KennelDataModel
+from app.models.persistence.kennel import KennelDataModel, KennelMemberDataModel
 
 
 class KennelLogicTests(unittest.TestCase):
@@ -51,9 +52,9 @@ class KennelMembershipTests(unittest.TestCase):
         if KennelMemberDataModel.exists():
             KennelMemberDataModel.delete_table()
         KennelMemberDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
-        self.kennel_a = 'kennel_a_id'
-        self.kennel_b = 'kennel_b_id'
-        self.hasher1 = 'hasher_1_id'
+        self.kennel_a = KennelLogicModel.create('kennel A', 'KAHHH')
+        self.kennel_b = KennelLogicModel.create('kennel B', 'KBHHH')
+        self.hasher1 = HasherLogicModel.create('Hasher 1', 'kennel A')
         self.hasher2 = 'hasher_2_id'
         self.hasher3 = 'hasher_3_id'
         self.name_a = 'Test_Kennel_A'

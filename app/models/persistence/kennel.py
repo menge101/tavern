@@ -99,6 +99,17 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
             return False
 
 
+class HasherMembershipIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = 'hasher_membership_index'
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = AllProjection()
+
+    hasher_id = UnicodeAttribute(hash_key=True)
+    kennel_id = UnicodeAttribute(range_key=True)
+
+
 # The kennel member data model holds the list of hashers that are members of a given kennel
 class KennelMemberDataModel(TimeStampableMixin, VersionMixin, BaseModel):
     class Meta(BaseMeta):
@@ -107,4 +118,8 @@ class KennelMemberDataModel(TimeStampableMixin, VersionMixin, BaseModel):
     kennel_id = UnicodeAttribute(hash_key=True)
     hasher_id = UnicodeAttribute(range_key=True)
     joined = UTCDateTimeAttribute(null=True)
+    hasher_membership_index = HasherMembershipIndex()
 
+    @classmethod
+    def members(cls, kennel_id):
+        return [result.hasher_id for result in (cls.query(kennel_id))]

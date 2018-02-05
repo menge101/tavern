@@ -34,3 +34,11 @@ class KennelMemberTests(unittest.TestCase):
         kennel_member.save()
         actual = KennelMemberDataModel.get(self.kennel_id, self.hasher_id)
         self.assertEqual(kennel_member, actual)
+
+    def test_members(self):
+        for x in range(3):
+            for y in range(5):
+                KennelMemberDataModel(kennel_id=f'kennel_{x}', hasher_id=f'hasher_{x}{y}', joined=self.joined).save()
+        actual = KennelMemberDataModel.members('kennel_2')
+        expected = [f'hasher_2{x}' for x in range(5)]
+        self.assertListEqual(actual, expected)

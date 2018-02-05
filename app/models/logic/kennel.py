@@ -1,4 +1,5 @@
 from ulid import ulid
+from app.models.persistence import AlreadyExists
 from app.models.persistence.kennel import KennelDataModel, KennelMemberDataModel
 from app.models.logic.base import LogicBase
 
