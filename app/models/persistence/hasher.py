@@ -21,12 +21,6 @@ class HasherDataModel(TimeStampableMixin, BaseModel):
         table_name = 'hashers'
 
     def __init__(self, hash_key=None, range_key=None, **attributes):
-        hook = ['set_searchable_hash_name']
-        try:
-            self.before_save_hooks.extend(hook)
-        except AttributeError:
-            self.before_save_hooks = hook
-
         meta_attributes = ['hasher_id']
         try:
             self.__meta_attributes__.extend(meta_attributes)
@@ -49,13 +43,6 @@ class HasherDataModel(TimeStampableMixin, BaseModel):
             msg = f'Record with hash name {self.hash_name} with mother kennel {self.mother_kennel} already exists'
             raise AlreadyExists(msg)
         super().save(condition=condition, conditional_operator=conditional_operator, **expected_values)
-
-    def set_searchable_hash_name(self):
-        try:
-            if self.lower_hash_name is None:
-                self.lower_hash_name = self.hash_name.lower()
-        except AttributeError:
-            raise(ValueError('Value of hash_name cannot be None'))
 
     # This method is implemented such that if two hasher records were attempted to be created with the same
     # hash name and mother kennel, they would collide.  It is expected that the same kennel will not have two hashers
