@@ -1,4 +1,9 @@
+import os
 from pynamodb.models import Model
+
+
+class BaseMeta(object):
+    host = os.environ.get('DYNAMODBURL')
 
 
 class BaseModel(Model):
@@ -7,11 +12,6 @@ class BaseModel(Model):
 
     def attributes(self):
         return {k: v for (k, v) in self.attribute_values.items() if k not in self.__meta_attributes__}
-
-    def host(self, value=None):
-        if value is not None:
-            self.Meta.host = value
-        return self.Meta.host
 
     def save(self, condition=None, conditional_operator=None, **expected_values):
         for hook in self.before_save_hooks:

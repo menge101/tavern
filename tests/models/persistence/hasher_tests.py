@@ -6,10 +6,6 @@ from freezegun import freeze_time
 
 
 class HasherTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        HasherDataModel.Meta.host = 'http://localhost:8000'
-
     def setUp(self):
         self.hasher_id = 'test_id'
         self.name = 'test_hasher'

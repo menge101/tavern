@@ -1,12 +1,12 @@
 from app.models.persistence import AlreadyExists
-from app.models.persistence.base import BaseModel
+from app.models.persistence.base import BaseMeta, BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from pynamodb.attributes import JSONAttribute, UnicodeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 
 class HashNameIndex(GlobalSecondaryIndex):
-    class Meta:
+    class Meta(BaseMeta):
         index_name = 'hash_name_index'
         read_capacity_units = 1
         write_capacity_units = 1
@@ -17,7 +17,7 @@ class HashNameIndex(GlobalSecondaryIndex):
 
 
 class HasherDataModel(TimeStampableMixin, BaseModel):
-    class Meta:
+    class Meta(BaseMeta):
         table_name = 'hashers'
 
     def __init__(self, hash_key=None, range_key=None, **attributes):

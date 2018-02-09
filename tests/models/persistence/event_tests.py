@@ -23,7 +23,6 @@ class EventTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        EventDataModel.Meta.host = 'http://localhost:8000'
         EventDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
 
     @classmethod
@@ -53,15 +52,6 @@ class EventTests(unittest.TestCase):
         self.event.delete()
         with self.assertRaises(EventDataModel.DoesNotExist):
             EventDataModel.get(self.event_id)
-
-    def test_set_host(self):
-        new_host = 'http://www.notreal.org:8000'
-        self.event.host(new_host)
-        self.assertEqual(new_host, self.event.host())
-        self.assertEqual(EventDataModel.Meta.host, new_host)
-
-    def test_get_host(self):
-        self.assertEqual('http://localhost:8000', self.event.host())
 
     def test_timestamps(self):
         time = datetime.now(timezone.utc)

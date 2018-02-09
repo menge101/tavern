@@ -6,10 +6,6 @@ from freezegun import freeze_time
 
 
 class KennelTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        KennelDataModel.Meta.host = 'http://localhost:8000'
-
     def setUp(self):
         self.kennel_id = 'test_id'
         self.name = 'Test_Kennel'

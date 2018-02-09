@@ -1,5 +1,5 @@
 from app.models.persistence import AlreadyExists
-from app.models.persistence.base import BaseModel
+from app.models.persistence.base import BaseMeta, BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.mixins.version import VersionMixin
 from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
@@ -7,7 +7,7 @@ from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 
 class KennelNameIndex(GlobalSecondaryIndex):
-    class Meta:
+    class Meta(BaseMeta):
         index_name = 'kennel_name_index'
         read_capacity_units = 1
         write_capacity_units = 1
@@ -17,7 +17,7 @@ class KennelNameIndex(GlobalSecondaryIndex):
 
 
 class KennelAcronymIndex(GlobalSecondaryIndex):
-    class Meta:
+    class Meta(BaseMeta):
         index_name = 'kennel_acronym_index'
         read_capacity_units = 1
         write_capacity_units = 1
@@ -33,7 +33,7 @@ class KennelAcronymIndex(GlobalSecondaryIndex):
 #  kennel name requires that lower_name be automatically updated.
 # This is a price to pay for using atomic updates.
 class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
-    class Meta:
+    class Meta(BaseMeta):
         table_name = 'kennels'
 
     def __init__(self, hash_key=None, range_key=None, **attributes):
@@ -101,7 +101,7 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
 
 # The kennel member data model holds the list of hashers that are members of a given kennel
 class KennelMemberDataModel(TimeStampableMixin, VersionMixin, BaseModel):
-    class Meta:
+    class Meta(BaseMeta):
         table_name = 'kennel_members'
 
     kennel_id = UnicodeAttribute(hash_key=True)
