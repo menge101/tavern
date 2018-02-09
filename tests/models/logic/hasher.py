@@ -3,14 +3,17 @@ from app.models.logic.hasher import HasherLogicModel
 from app.models.logic.kennel import KennelLogicModel
 from app.models.persistence import AlreadyExists
 from app.models.persistence.hasher import HasherDataModel
+from app.models.persistence.kennel import KennelDataModel
 
 
 class HasherLogicTests(unittest.TestCase):
     def setUp(self):
+        if KennelDataModel.exists():
+            KennelDataModel.delete_table()
+        KennelDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
         self.hasher_id = 'test_id'
         self.hash_name = 'Testy Cream'
-        self.mother_kennel = KennelLogicModel('Test Kennel 1', 'TK1H3')
-        HasherDataModel.Meta.host = 'http://localhost:8000'
+        self.mother_kennel = KennelLogicModel.create('Test Kennel 1', 'TK1H3')
         if HasherDataModel.exists():
             HasherDataModel.delete_table()
         HasherDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
