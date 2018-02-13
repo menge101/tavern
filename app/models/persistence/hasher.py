@@ -1,8 +1,19 @@
 from app.models.persistence import AlreadyExists
 from app.models.persistence.base import BaseMeta, BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
-from pynamodb.attributes import JSONAttribute, UnicodeAttribute
+from pynamodb.attributes import JSONAttribute, MapAttribute, UnicodeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
+
+
+class HasherMotherKennelAttribute(MapAttribute):
+    kennel_id = UnicodeAttribute()
+    name = UnicodeAttribute()
+    acronym = UnicodeAttribute()
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.__dict__ == other.__dict__
 
 
 class HashNameIndex(GlobalSecondaryIndex):
@@ -13,7 +24,7 @@ class HashNameIndex(GlobalSecondaryIndex):
         projection = AllProjection()
 
     lower_hash_name = UnicodeAttribute(hash_key=True)
-    mother_kennel = UnicodeAttribute(range_key=True)
+    mother_kennel_name_lower = UnicodeAttribute(range_key=True)
 
 
 class HasherDataModel(TimeStampableMixin, BaseModel):
@@ -32,7 +43,8 @@ class HasherDataModel(TimeStampableMixin, BaseModel):
     contact_info = JSONAttribute(null=True)
     hash_name = UnicodeAttribute()
     lower_hash_name = UnicodeAttribute()
-    mother_kennel = UnicodeAttribute()
+    mother_kennel = HasherMotherKennelAttribute()
+    mother_kennel_name_lower = UnicodeAttribute()
     real_name = UnicodeAttribute(null=True)
     user = UnicodeAttribute(null=True)
     hash_name_index = HashNameIndex()
@@ -51,7 +63,7 @@ class HasherDataModel(TimeStampableMixin, BaseModel):
     @classmethod
     def matching_records(cls, record, filter_self=True):
         query_result = cls.hash_name_index.query(record.lower_hash_name,
-                                                 cls.mother_kennel == record.mother_kennel)
+                                                 cls.mother_kennel_name_lower == record.mother_kennel_name_lower)
         record_attrs = record.attributes()
         results = [result for result in query_result]
         results = [result for result in results if cls._record_match(result.attributes(), record_attrs)]
