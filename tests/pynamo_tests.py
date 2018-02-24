@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 import pynamodb.exceptions
 from .pynamo_test_model import PynamoTestModel
 
@@ -34,3 +34,12 @@ class PynamoTests(unittest.TestCase):
         self.assertTrue(PynamoTestModel.exists())
         PynamoTestModel.delete_table()
         self.assertFalse(PynamoTestModel.exists())
+
+    def test_update_with_no_create(self):
+        current_time = datetime.now(timezone.utc)
+        PynamoTestModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+        PynamoTestModel('test1').update(actions=[PynamoTestModel.description.set('hi')])
+        PynamoTestModel('test1').update(actions=[PynamoTestModel.start_time.set(current_time)])
+        a = PynamoTestModel.get('test1')
+        self.assertEqual(a.description, 'hi')
+        self.assertEqual(a.start_time, current_time)
