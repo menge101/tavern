@@ -1,4 +1,5 @@
 from ulid import ulid
+from datetime import datetime, timezone
 from app.models.persistence import AlreadyExists
 from app.models.persistence.kennel import KennelDataModel, KennelMemberDataModel
 from app.models.logic.base import LogicBase
@@ -37,17 +38,17 @@ class KennelLogicModel(LogicBase):
         else:
             self.persistence_object = persistence_object
 
-    def add_member(self, hasher_id):
-        if self.has_member(hasher_id):
-            raise AlreadyExists(f'{self.name} already has a member with id {hasher_id}')
-        self.create_membership(self.kennel_id, hasher_id)
+    def add_member(self, hasher):
+        if self.has_member(hasher):
+            raise AlreadyExists(f'{self.name} already has a member with id {hasher}')
+        self.create_membership(self, hasher)
         self.load_members()
 
-    def has_member(self, hasher_id):
-        return hasher_id in self.members
+    def has_member(self, hasher):
+        return hasher.persistence_object.to_ref() in self.members
 
     def load_members(self):
-        self.members = self.list_members(self.kennel_id)
+        self.members = self.list_members(self)
 
     @staticmethod
     def _extract_hasher_ids_from_query(result):
@@ -67,8 +68,9 @@ class KennelLogicModel(LogicBase):
         return kennel
 
     @staticmethod
-    def create_membership(kennel_id, hasher_id):
-        KennelMemberDataModel(kennel_id, hasher_id).save()
+    def create_membership(kennel, hasher):
+        KennelMemberDataModel(kennel.kennel_id, hasher.hasher_id, kennel_ref=kennel.persistence_object.to_ref(),
+                              hasher_ref=hasher.persistence_object.to_ref(), joined=datetime.now(tz=timezone.utc)).save()
 
     @staticmethod
     def lookup_by_id(kennel_id):
@@ -79,7 +81,9 @@ class KennelLogicModel(LogicBase):
         return KennelLogicModel(**attribute_dict)
 
     @classmethod
-    def list_members(cls, kennel_id):
-        raw_result = KennelMemberDataModel.query(kennel_id)
-        return cls._extract_hasher_ids_from_query(raw_result)
+    def lookup_by_ref(cls, kennel_ref):
+        return cls.lookup_by_id(kennel_ref.kennel_id)
 
+    @classmethod
+    def list_members(cls, kennel):
+        return KennelMemberDataModel.members(kennel.kennel_id)
