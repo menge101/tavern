@@ -70,7 +70,8 @@ class KennelLogicModel(LogicBase):
     @staticmethod
     def create_membership(kennel, hasher):
         KennelMemberDataModel(kennel.kennel_id, hasher.hasher_id, kennel_ref=kennel.persistence_object.to_ref(),
-                              hasher_ref=hasher.persistence_object.to_ref(), joined=datetime.now(tz=timezone.utc)).save()
+                              hasher_ref=hasher.persistence_object.to_ref(),
+                              joined=datetime.now(tz=timezone.utc)).save()
 
     @staticmethod
     def lookup_by_id(kennel_id):

@@ -3,7 +3,8 @@ from app.models.persistence.base import BaseMeta, BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.mixins.version import VersionMixin
 from app.models.persistence.hasher import HasherReferenceModel
-from pynamodb.attributes import JSONAttribute, ListAttribute, MapAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from pynamodb.attributes import JSONAttribute, ListAttribute, MapAttribute, NumberAttribute, UnicodeAttribute, \
+    UTCDateTimeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 

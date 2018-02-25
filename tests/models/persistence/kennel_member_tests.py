@@ -56,7 +56,8 @@ class KennelMemberTests(unittest.TestCase):
                 hasher_model = HasherLogicModel.create(f'hasher_{x}{y}', kennel_model)
                 hasher = hasher_model.persistence_object
                 hashers.append(hasher)
-                membership = KennelMemberDataModel(kennel.kennel_id, hasher.hasher_id, hasher_ref=hasher.to_ref(), kennel_ref=kennel.to_ref())
+                membership = KennelMemberDataModel(kennel.kennel_id, hasher.hasher_id, hasher_ref=hasher.to_ref(),
+                                                   kennel_ref=kennel.to_ref())
                 membership.save()
         actual = KennelMemberDataModel.members(kennels[1].kennel_id)
         actual_names = [hasher.hash_name for hasher in actual]

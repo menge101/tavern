@@ -1,5 +1,4 @@
 from ulid import ulid
-from app.models.persistence import AlreadyExists
 from app.models.logic.base import LogicBase
 from app.models.persistence.hasher import HasherDataModel
 
