@@ -27,6 +27,19 @@ class HashNameIndex(GlobalSecondaryIndex):
     mother_kennel_name_lower = UnicodeAttribute(range_key=True)
 
 
+class HasherReferenceModel(MapAttribute):
+    hasher_id = UnicodeAttribute()
+    hash_name = UnicodeAttribute()
+
+    def is_ref(self, kennel):
+        if not isinstance(kennel, HasherDataModel):
+            return False
+        for attr in self.attribute_values.keys():
+            if self.attribute_values[attr] != kennel.attribute_values[attr]:
+                return False
+        return True
+
+
 class HasherDataModel(TimeStampableMixin, BaseModel):
     class Meta(BaseMeta):
         table_name = 'hashers'
@@ -55,6 +68,9 @@ class HasherDataModel(TimeStampableMixin, BaseModel):
             msg = f'Record with hash name {self.hash_name} with mother kennel {self.mother_kennel} already exists'
             raise AlreadyExists(msg)
         super().save(condition=condition, conditional_operator=conditional_operator, **expected_values)
+
+    def to_ref(self):
+        return HasherReferenceModel(hasher_id=self.hasher_id, hash_name=self.hash_name)
 
     # This method is implemented such that if two hasher records were attempted to be created with the same
     # hash name and mother kennel, they would collide.  It is expected that the same kennel will not have two hashers

@@ -152,3 +152,25 @@ class HasherTests(unittest.TestCase):
         start.save()
         start.save()
         self.assertTrue(HasherDataModel.record_exists(start))
+
+    def test_is_ref(self):
+        mdl = HasherDataModel('hasher1', mother_kennel=self.kennel, hash_name=self.name,
+                              lower_hash_name=self.name.lower(), mother_kennel_name_lower=self.kennel['name'].lower())
+        ref = mdl.to_ref()
+        self.assertTrue(ref.is_ref(mdl))
+
+    def test_is_not_ref(self):
+        mdl = HasherDataModel('hasher1', mother_kennel=self.kennel, hash_name=self.name,
+                              lower_hash_name=self.name.lower(), mother_kennel_name_lower=self.kennel['name'].lower())
+        mdl2 = HasherDataModel('diff', mother_kennel=self.kennel, hash_name=self.name,
+                               lower_hash_name=self.name.lower(), mother_kennel_name_lower=self.kennel['name'].lower())
+        ref = mdl2.to_ref()
+        self.assertFalse(ref.is_ref(mdl))
+
+    def test_is_not_ref_diff_class(self):
+        mdl = HasherDataModel('hasher1', mother_kennel=self.kennel, hash_name=self.name,
+                              lower_hash_name=self.name.lower(), mother_kennel_name_lower=self.kennel['name'].lower())
+        mdl2 = HasherDataModel('diff', mother_kennel=self.kennel, hash_name=self.name,
+                               lower_hash_name=self.name.lower(), mother_kennel_name_lower=self.kennel['name'].lower())
+        ref = mdl2.to_ref()
+        self.assertFalse(ref.is_ref(mdl.to_ref()))
