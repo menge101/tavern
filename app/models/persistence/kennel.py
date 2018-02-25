@@ -2,6 +2,7 @@ from app.models.persistence import AlreadyExists
 from app.models.persistence.base import BaseMeta, BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.mixins.version import VersionMixin
+from app.models.persistence.hasher import HasherReferenceModel
 from pynamodb.attributes import JSONAttribute, ListAttribute, MapAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
@@ -126,6 +127,11 @@ class KennelReferenceModel(MapAttribute):
                 return False
         return True
 
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.__dict__ == other.__dict__
+
 
 # The kennel member data model holds the list of hashers that are members of a given kennel
 class KennelMemberDataModel(TimeStampableMixin, VersionMixin, BaseModel):
@@ -133,10 +139,12 @@ class KennelMemberDataModel(TimeStampableMixin, VersionMixin, BaseModel):
         table_name = 'kennel_members'
 
     kennel_id = UnicodeAttribute(hash_key=True)
+    kennel_ref = KennelReferenceModel()
     hasher_id = UnicodeAttribute(range_key=True)
+    hasher_ref = HasherReferenceModel()
     joined = UTCDateTimeAttribute(null=True)
     hasher_membership_index = HasherMembershipIndex()
 
     @classmethod
     def members(cls, kennel_id):
-        return [result.hasher_id for result in (cls.query(kennel_id))]
+        return [result.hasher_ref for result in cls.query(kennel_id)]

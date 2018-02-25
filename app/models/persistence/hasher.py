@@ -39,6 +39,11 @@ class HasherReferenceModel(MapAttribute):
                 return False
         return True
 
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.__dict__ == other.__dict__
+
 
 class HasherDataModel(TimeStampableMixin, BaseModel):
     class Meta(BaseMeta):
