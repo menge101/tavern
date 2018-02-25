@@ -3,6 +3,7 @@ from app.models.logic.hasher import HasherLogicModel
 from app.models.logic.kennel import KennelLogicModel
 from app.models.persistence import AlreadyExists
 from app.models.persistence.kennel import KennelDataModel, KennelMemberDataModel
+from tests.models import logic
 
 
 class KennelLogicTests(unittest.TestCase):
@@ -10,8 +11,7 @@ class KennelLogicTests(unittest.TestCase):
         self.kennel_id = 'test_id'
         self.name = 'Test_Kennel'
         self.acronym = 'TKH3'
-        KennelDataModel.Meta.host = 'http://localhost:8000'
-        KennelDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+        logic.clean_create_tables([KennelDataModel, KennelMemberDataModel, HasherDataModel])
 
     def test_init_from_lookup(self):
         KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym,
@@ -33,6 +33,7 @@ class KennelLogicTests(unittest.TestCase):
         self.assertEqual(actual.acronym, self.acronym)
 
     def test_cant_create_same_name(self):
+        logic.clean_create_tables([KennelDataModel, ])
         KennelLogicModel.create(self.name, self.acronym)
         with self.assertRaises(AlreadyExists):
             KennelLogicModel.create(self.name, 'xxxhhh')
@@ -46,12 +47,7 @@ class KennelLogicTests(unittest.TestCase):
 
 class KennelMembershipTests(unittest.TestCase):
     def setUp(self):
-        KennelDataModel.Meta.host = 'http://localhost:8000'
-        KennelDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
-        KennelMemberDataModel.Meta.host = 'http://localhost:8000'
-        if KennelMemberDataModel.exists():
-            KennelMemberDataModel.delete_table()
-        KennelMemberDataModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+        logic.clean_create_tables([KennelDataModel, KennelMemberDataModel, HasherDataModel])
         self.kennel_a = KennelLogicModel.create('kennel A', 'KAHHH')
         self.kennel_b = KennelLogicModel.create('kennel B', 'KBHHH')
         self.hasher1 = HasherLogicModel.create('Hasher 1', 'kennel A')

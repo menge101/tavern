@@ -1,3 +1,4 @@
+from .common import clean_create_tables
 from .kennel import KennelLogicTests, KennelMembershipTests
 
 __all__ = ['KennelLogicTests', 'KennelMembershipTests']
