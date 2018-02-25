@@ -152,3 +152,33 @@ class KennelTests(unittest.TestCase):
         start.save()
         start.save()
         self.assertTrue(KennelDataModel.record_exists(start))
+
+    def test_to_ref(self):
+        ref = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym,
+                              lower_name=self.name.lower(), lower_acronym=self.acronym.lower()).to_ref()
+        self.assertEqual(ref.acronym, self.acronym)
+        self.assertEqual(ref.kennel_id, self.kennel_id)
+        self.assertEqual(ref.name, self.name)
+        self.assertListEqual(list(ref.attribute_values.keys()), ['kennel_id', 'name', 'acronym'])
+
+    def test_is_ref(self):
+        mdl = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym,
+                              lower_name=self.name.lower(), lower_acronym=self.acronym.lower())
+        ref = mdl.to_ref()
+        self.assertTrue(ref.is_ref(mdl))
+
+    def test_is_not_ref(self):
+        mdl = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym,
+                              lower_name=self.name.lower(), lower_acronym=self.acronym.lower())
+        mdl2 = KennelDataModel('diff', name=self.name, acronym=self.acronym,
+                               lower_name=self.name.lower(), lower_acronym=self.acronym.lower())
+        ref = mdl2.to_ref()
+        self.assertFalse(ref.is_ref(mdl))
+
+    def test_is_not_ref_diff_class(self):
+        mdl = KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym,
+                              lower_name=self.name.lower(), lower_acronym=self.acronym.lower())
+        mdl2 = KennelDataModel('diff', name=self.name, acronym=self.acronym,
+                               lower_name=self.name.lower(), lower_acronym=self.acronym.lower())
+        ref = mdl2.to_ref()
+        self.assertFalse(ref.is_ref(mdl.to_ref()))

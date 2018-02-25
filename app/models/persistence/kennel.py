@@ -2,7 +2,7 @@ from app.models.persistence import AlreadyExists
 from app.models.persistence.base import BaseMeta, BaseModel
 from app.models.persistence.mixins.timestamps import TimeStampableMixin
 from app.models.persistence.mixins.version import VersionMixin
-from pynamodb.attributes import JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from pynamodb.attributes import JSONAttribute, ListAttribute, MapAttribute, NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 
@@ -66,6 +66,9 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
             raise AlreadyExists(msg)
         super().save(condition=condition, conditional_operator=conditional_operator, **expected_values)
 
+    def to_ref(self):
+        return KennelReferenceModel(kennel_id=self.kennel_id, name=self.name, acronym=self.acronym)
+
     @classmethod
     def matching_records(cls, record, filter_self=True):
         if record.lower_name is None:
@@ -108,6 +111,20 @@ class HasherMembershipIndex(GlobalSecondaryIndex):
 
     hasher_id = UnicodeAttribute(hash_key=True)
     kennel_id = UnicodeAttribute(range_key=True)
+
+
+class KennelReferenceModel(MapAttribute):
+    kennel_id = UnicodeAttribute()
+    name = UnicodeAttribute()
+    acronym = UnicodeAttribute()
+
+    def is_ref(self, kennel):
+        if not isinstance(kennel, KennelDataModel):
+            return False
+        for attr in self.attribute_values.keys():
+            if self.attribute_values[attr] != kennel.attribute_values[attr]:
+                return False
+        return True
 
 
 # The kennel member data model holds the list of hashers that are members of a given kennel
