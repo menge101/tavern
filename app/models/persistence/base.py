@@ -1,4 +1,5 @@
 import os
+import re
 from pynamodb.models import Model
 
 
@@ -27,3 +28,10 @@ class BaseModel(Model):
         if not isinstance(other, self.__class__):
             return False
         return self.__dict__ == other.__dict__
+
+    # This method exists to create consistent searchable names.  If a hasher exists with a name
+    # of 'Cheesy Grits', we can be reasonably sure that 'Cheesy  Grits', 'cheesy grits', 'Cheesy grits'
+    # can not also is not also get created
+    @staticmethod
+    def searchable_value(value):
+        return re.sub(r'\s+', '', value).lower()
