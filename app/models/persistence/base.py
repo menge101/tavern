@@ -19,6 +19,10 @@ class BaseModel(Model):
             getattr(self, hook)()
         super(BaseModel, self).save(condition=condition, conditional_operator=conditional_operator, **expected_values)
 
+    def to_ref(self, reference_class):
+        valid_keys = [key for key in reference_class.__dict__.keys() if not key.startswith('_')]
+        return reference_class(**{k: v for k, v in self.attributes().items() if k in valid_keys})
+
     def update(self, attributes=None, actions=None, condition=None, conditional_operator=None, **expected_values):
         actions.extend([getattr(self, hook)() for hook in self.on_update_hooks])
         super(BaseModel, self).update(attributes=attributes, actions=actions, condition=condition,
