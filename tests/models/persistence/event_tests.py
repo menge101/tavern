@@ -49,7 +49,7 @@ class EventTests(unittest.TestCase):
         self.event.refresh()
         retrieved_obj = EventDataModel.get(self.event_id, self.start_time)
         self.assertEqual(retrieved_obj, self.event)
-        self.assertTrue(retrieved_obj.type, new_type)
+        self.assertEqual(retrieved_obj.type, new_type)
 
     def test_delete(self):
         self.assertTrue(self.event.exists())
