@@ -4,12 +4,13 @@ from freezegun import freeze_time
 from app.models.persistence.event import EventReferenceModel
 from app.models.persistence.hasher import HasherReferenceModel
 from app.models.persistence.kennel import KennelReferenceModel
-from app.models.persistence.location import EventLocationDataModel, LocationDataModel, LocationReferenceModel
+from app.models.persistence.location import AlreadyExists, EventLocationDataModel, LocationDataModel, LocationReferenceModel
 
 
 class LocationTests(unittest.TestCase):
     def setUp(self):
-        self.geohash = 'aaaa1111'
+        self.location_id = 'testid'
+        self.geohash = 'AAAA1111'
         self.name = 'Test Location'
         self.searchable_name = LocationDataModel.searchable_value(self.name)
         self.address1 = '123 Fake st.'
@@ -17,13 +18,18 @@ class LocationTests(unittest.TestCase):
         self.city = 'Fakesville'
         self.state_province_region = 'FK'
         self.postal_code = '12345-6789'
+        self.country = 'united states of america'
         self.latitude = 123.987654
         self.longitude = 85.12345
+        self.search_add = LocationDataModel.generate_searchable_address(self.address1, self.address2, self.city,
+                                                                        self.state_province_region, self.postal_code,
+                                                                        self.country)
         self.location = LocationDataModel(self.geohash, self.searchable_name, name=self.name, address1=self.address1,
                                           address2=self.address2, city=self.city,
                                           state_province_region=self.state_province_region,
-                                          postal_code=self.postal_code, longitude=self.longitude,
-                                          latitude=self.latitude)
+                                          postal_code=self.postal_code, country=self.country, longitude=self.longitude,
+                                          latitude=self.latitude, searchable_address=self.search_add,
+                                          location_id=self.location_id)
         self.location.save()
 
     @classmethod
@@ -62,11 +68,12 @@ class LocationTests(unittest.TestCase):
     def test_timestamps(self):
         time = datetime.now(timezone.utc)
         with freeze_time(time):
-            loc = LocationDataModel(self.geohash, self.searchable_name, name=self.name, address1=self.address1,
+            loc = LocationDataModel('BBBB2222', self.searchable_name, name=self.name, address1=self.address1,
                                     address2=self.address2, city=self.city,
                                     state_province_region=self.state_province_region,
-                                    postal_code=self.postal_code, longitude=self.longitude,
-                                    latitude=self.latitude)
+                                    postal_code=self.postal_code, country=self.country, longitude=self.longitude,
+                                    latitude=self.latitude, searchable_address=self.search_add,
+                                    location_id=self.location_id)
             loc.save()
             self.assertEqual(loc.modified_at, time)
             self.assertEqual(loc.created_at, time)
@@ -82,6 +89,7 @@ class LocationTests(unittest.TestCase):
         self.assertEqual(ref.postal_code, self.postal_code)
         self.assertEqual(ref.latitude, self.latitude)
         self.assertEqual(ref.longitude, self.longitude)
+        self.assertEqual(ref.country, self.country)
 
     def test_is_ref_of(self):
         ref = LocationReferenceModel(geohash=self.geohash, name=self.name, address1=self.address1,
@@ -89,6 +97,27 @@ class LocationTests(unittest.TestCase):
                                      state_province_region=self.state_province_region, postal_code=self.postal_code,
                                      latitude=self.latitude, longitude=self.longitude)
         self.assertTrue(ref.is_ref_of(self.location))
+
+    def test_create_duplicate_location(self):
+        dupe = LocationDataModel(self.geohash, self.searchable_name, name=self.name, address1=self.address1,
+                                 address2=self.address2, city=self.city,
+                                 state_province_region=self.state_province_region,
+                                 postal_code=self.postal_code, country=self.country, longitude=self.longitude,
+                                 latitude=self.latitude, searchable_address=self.search_add,
+                                 location_id='dupe_test')
+        with self.assertRaises(AlreadyExists):
+            dupe.save()
+
+    def test_create_same_geo_loc_different_floor(self):
+        also = LocationDataModel(self.geohash, 'adifferentplace', name=self.name, address1=self.address1,
+                                 address2=self.address2, city=self.city,
+                                 state_province_region=self.state_province_region,
+                                 postal_code=self.postal_code, country=self.country, longitude=self.longitude,
+                                 latitude=self.latitude, searchable_address=self.search_add,
+                                 location_id='also_test')
+        also.save()
+        results = LocationDataModel.count(self.geohash)
+        self.assertEqual(results, 2)
 
 
 class EventLocationTests(unittest.TestCase):

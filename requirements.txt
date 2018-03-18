@@ -1,4 +1,6 @@
+base32-crockford
 geocoder
 geohash
 pynamodb
+regex
 ulid
