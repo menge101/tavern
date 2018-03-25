@@ -56,22 +56,42 @@ class LongitudeLatitudeIndex(GlobalSecondaryIndex):
     latitude = NumberAttribute(range_key=True)
 
 
+class SearchableNameIndex(GlobalSecondaryIndex):
+    class Meta(BaseMeta):
+        index_name = 'searchable_name_index'
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = AllProjection()
+
+    searchable_name_prefix = UnicodeAttribute(hash_key=True)
+    searchable_name_suffix = UnicodeAttribute(range_key=True)
+
+
 class LocationDataModel(TimeStampableMixin, BaseModel):
     class Meta(BaseMeta):
         table_name = 'locations'
 
+    __before_save_hooks__ = ['split_searchable_name']
+
     def __init__(self, hash_key=None, range_key=None, **attributes):
-        meta_attributes = ['location_id']
+        meta_attributes = ['location_id', 'searchable_name_prefix', 'searchable_name_suffix']
         try:
             self.__meta_attributes__.extend(meta_attributes)
         except AttributeError:
             self.__meta_attributes__ = meta_attributes
+
+        try:
+            self.before_save_hooks.extend(self.__before_save_hooks__)
+        except AttributeError:
+            self.before_save_hooks = self.__before_save_hooks__
         super().__init__(hash_key, range_key, **attributes)
 
-    location_id = UnicodeAttribute()
-    geohash = UnicodeAttribute(hash_key=True)
+    location_id = UnicodeAttribute(hash_key=True)
+    geohash = UnicodeAttribute()
     name = UnicodeAttribute()
-    searchable_name = UnicodeAttribute(range_key=True)
+    searchable_name = UnicodeAttribute()
+    searchable_name_prefix = UnicodeAttribute()
+    searchable_name_suffix = UnicodeAttribute()
     address1 = UnicodeAttribute()
     address2 = UnicodeAttribute()
     city = UnicodeAttribute()
@@ -80,9 +100,9 @@ class LocationDataModel(TimeStampableMixin, BaseModel):
     postal_code = UnicodeAttribute()
     longitude = NumberAttribute()
     latitude = NumberAttribute()
-    searchable_address = UnicodeAttribute()
     location_name_index = LocationNameIndex()
     long_lat_index = LongitudeLatitudeIndex()
+    searchable_name_index = SearchableNameIndex()
 
     def save(self, condition=None, conditional_operator=None, **expected_values):
         matches = self.matching_records_by_proximity(self)
@@ -90,6 +110,10 @@ class LocationDataModel(TimeStampableMixin, BaseModel):
             msg = f'Record with name {self.name} already exists in the same proximity.'
             raise AlreadyExists(msg)
         super().save(condition=condition, conditional_operator=conditional_operator, **expected_values)
+
+    def split_searchable_name(self):
+        self.searchable_name_prefix = self.searchable_name[0:3]
+        self.searchable_name_suffix = self.searchable_name[3:]
 
     def to_ref(self):
         return super().to_ref(LocationReferenceModel)
