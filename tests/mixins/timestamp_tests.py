@@ -12,7 +12,6 @@ class TimestampTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        TimestampTestModel.Meta.host = 'http://localhost:8000'
         if TimestampTestModel.exists():
             TimestampTestModel.delete_table()
         TimestampTestModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
@@ -30,7 +29,8 @@ class TimestampTests(unittest.TestCase):
             self.model.save()
         after_save = datetime.now(timezone.utc)
         with freeze_time(after_save):
-            self.model.update(actions=[TimestampTestModel.field.set('test_2')])
+            self.model.add_update_action('field', 'set', 'test_2')
+            self.model.update()
         result = TimestampTestModel.get('test')
         self.assertEqual(result.created_at, start_time)
         self.assertEqual(result.modified_at, after_save)

@@ -15,7 +15,7 @@ class KennelNameIndex(GlobalSecondaryIndex):
         write_capacity_units = 1
         projection = AllProjection()
 
-    lower_name = UnicodeAttribute(hash_key=True)
+    searchable_name = UnicodeAttribute(hash_key=True)
 
 
 class KennelAcronymIndex(GlobalSecondaryIndex):
@@ -25,8 +25,8 @@ class KennelAcronymIndex(GlobalSecondaryIndex):
         write_capacity_units = 1
         projection = AllProjection()
 
-    lower_acronym = UnicodeAttribute(hash_key=True)
-    lower_name = UnicodeAttribute(range_key=True)
+    searchable_acronym = UnicodeAttribute(hash_key=True)
+    searchable_name = UnicodeAttribute(range_key=True)
 
 
 # The Kennel Data model holds all non-list kennel data
@@ -35,22 +35,27 @@ class KennelAcronymIndex(GlobalSecondaryIndex):
 #  kennel name requires that lower_name be automatically updated.
 # This is a price to pay for using atomic updates.
 class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
+    __before_save_hooks__ = ['set_searchable_name', 'set_searchable_acronym']
+    __on_init_hooks__ = ['set_searchable_name', 'set_searchable_acronym']
+    __update_action_hooks__ = {'set': {'name': 'set_searchable_name_action',
+                                       'acronym': 'set_searchable_acronym_action'}}
+
     class Meta(BaseMeta):
         table_name = 'kennels'
 
     def __init__(self, hash_key=None, range_key=None, **attributes):
-        meta_attributes = ['kennel_id']
-        try:
-            self.__meta_attributes__.extend(meta_attributes)
-        except AttributeError:
-            self.__meta_attributes__ = meta_attributes
+        meta_attributes = ['kennel_id', 'searchable_name', 'searchable_acronym']
+        self.assign_or_extend('__meta_attributes__', meta_attributes)
+        self.assign_or_extend('on_init_hooks', __class__.__on_init_hooks__)
+        self.assign_or_extend('before_save_hooks', __class__.__before_save_hooks__)
+        self.assign_or_update('update_action_hooks', __class__.__update_action_hooks__)
         super().__init__(hash_key, range_key, **attributes)
 
     kennel_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
-    lower_name = UnicodeAttribute()
+    searchable_name = UnicodeAttribute()
     acronym = UnicodeAttribute()
-    lower_acronym = UnicodeAttribute()
+    searchable_acronym = UnicodeAttribute()
     region = ListAttribute(null=True)
     contact = JSONAttribute(null=True)
     webpage = UnicodeAttribute(null=True)
@@ -68,14 +73,30 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
             raise AlreadyExists(msg)
         super().save(condition=condition, conditional_operator=conditional_operator, **expected_values)
 
+    def set_searchable_acronym(self):
+        if self.acronym is None:
+            raise ValueError('acronym cannot be None')
+        self.searchable_acronym = self.searchable_value(self.acronym)
+
+    def set_searchable_acronym_action(self, acronym):
+        return [KennelDataModel.searchable_acronym.set(self.searchable_value(acronym))]
+
+    def set_searchable_name(self):
+        if self.name is None:
+            raise ValueError('name cannot be None')
+        self.searchable_name = self.searchable_value(self.name)
+
+    def set_searchable_name_action(self, name):
+        return [KennelDataModel.searchable_name.set(self.searchable_value(name))]
+
     def to_ref(self):
         return KennelReferenceModel(kennel_id=self.kennel_id, name=self.name, acronym=self.acronym)
 
     @classmethod
     def matching_records(cls, record, filter_self=True):
-        if record.lower_name is None:
-            raise ValueError('Lower name cannot be None.')
-        query_result = cls.name_index.query(record.lower_name)
+        if record.searchable_name is None:
+            raise ValueError('searchable name cannot be None.')
+        query_result = cls.name_index.query(record.searchable_name)
         record_attrs = record.attributes()
         results = [result for result in query_result if cls._record_match(result.attributes(), record_attrs)]
         if filter_self:
@@ -84,10 +105,10 @@ class KennelDataModel(TimeStampableMixin, VersionMixin, BaseModel):
 
     @classmethod
     def matching_records_by_name(cls, record, filter_self=True):
-        if record.lower_name is None:
-            raise ValueError('Lower name cannot be None.')
-        query_result = cls.name_index.query(record.lower_name)
-        results = [result for result in query_result if result.lower_name == record.lower_name]
+        if record.searchable_name is None:
+            raise ValueError('searchable name cannot be None.')
+        query_result = cls.name_index.query(record.searchable_name)
+        results = [result for result in query_result if result.searchable_name == record.searchable_name]
         if filter_self:
             results = [result for result in results if result.kennel_id != record.kennel_id]
         return results

@@ -15,8 +15,7 @@ class KennelLogicTests(unittest.TestCase):
         logic.clean_create_tables([KennelDataModel, KennelMemberDataModel, HasherDataModel])
 
     def test_init_from_lookup(self):
-        KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym,
-                        lower_name=self.name.lower(), lower_acronym=self.acronym.lower()).save()
+        KennelDataModel(self.kennel_id, name=self.name, acronym=self.acronym).save()
         x = KennelLogicModel.lookup_by_id(self.kennel_id)
         self.assertEqual(self.kennel_id, x.kennel_id)
         self.assertEqual(self.name, x.name)

@@ -45,7 +45,8 @@ class EventTests(unittest.TestCase):
 
     def test_update(self):
         new_type = 'different type'
-        self.event.update(actions=[EventDataModel.type.set(new_type)])
+        self.event.add_update_action('type', 'set', new_type)
+        self.event.update()
         self.event.refresh()
         retrieved_obj = EventDataModel.get(self.event_id, self.start_time)
         self.assertEqual(retrieved_obj, self.event)

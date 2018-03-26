@@ -7,7 +7,6 @@ from .multi_mixin_test_model import MultiMixinTestModel
 class MultiMixinTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        MultiMixinTestModel.Meta.host = 'http://localhost:8000'
         if MultiMixinTestModel.exists():
             MultiMixinTestModel.delete_table()
         MultiMixinTestModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
@@ -29,7 +28,8 @@ class MultiMixinTests(unittest.TestCase):
             model.save()
         after_save = datetime.now(timezone.utc)
         with freeze_time(after_save):
-            model.update(actions=[MultiMixinTestModel.field.set('test_2')])
+            model.add_update_action('field', 'set', 'test_2')
+            model.update()
         result = MultiMixinTestModel.get('test1')
         self.assertEqual(result.created_at, start_time)
         self.assertEqual(result.modified_at, after_save)

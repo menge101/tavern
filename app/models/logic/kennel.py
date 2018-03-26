@@ -9,19 +9,12 @@ class KennelLogicModel(LogicBase):
     __unpersistable_attributes__ = ['events', 'members', 'officers']
 
     def __init__(self, name, acronym, kennel_id=None, description=None, region=None, contact=None, webpage=None,
-                 founding=None, next_trail_number=None, facebook=None, lower_acronym=None, lower_name=None,
-                 persistence_object=None):
-        if lower_acronym is None:
-            lower_acronym = acronym.lower()
-        if lower_name is None:
-            lower_name = name.lower()
+                 founding=None, next_trail_number=None, facebook=None, persistence_object=None):
         super().__init__()
         self.unpersist_values(__class__)
         self.kennel_id = ulid() if kennel_id is None else kennel_id
         self.name = name
-        self.lower_name = lower_name
         self.acronym = acronym
-        self.lower_acronym = lower_acronym
         self.region = region
         self.events = None
         self.members = list()
